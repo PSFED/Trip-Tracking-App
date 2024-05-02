@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy
-from django.views.generic import TemplateView, CreateView, DetailView, ListView
+from django.views.generic import DeleteView, UpdateView, TemplateView, CreateView, DetailView, ListView
 from .models import Trip, Note
 
 
@@ -47,3 +47,43 @@ class NoteListView(ListView):
     def get_queryset(self):
         queryset = Note.objects.filter(trip__owner=self.request.user)
         return queryset
+
+
+class NoteCreateView(CreateView):
+    model = Note
+    success_url = reverse_lazy('note-list')
+    fields = '__all__'  # ['name', 'description', 'type', 'img', 'rating']
+
+    def get_form(self):
+        form = super(NoteCreateView, self).get_form()
+        trips = Trip.objects.filter(owner=self.request.user)
+        form.fields['trip'].queryset = trips
+        return form
+
+
+class NoteUpdateView(UpdateView):
+    model = Note
+    success_url = reverse_lazy('note-list')
+    fields = '__all__'  # ['name', 'description', 'type', 'img', 'rating']
+
+    def get_form(self):
+        form = super(NoteUpdateView, self).get_form()
+        trips = Trip.objects.filter(owner=self.request.user)
+        form.fields['trip'].queryset = trips
+        return form
+
+
+class NoteDeleteView(DeleteView):
+    model = Note
+    success_url = reverse_lazy('note-list')
+
+
+class TripUpdateView(UpdateView):
+    model = Trip
+    success_url = reverse_lazy('trip-list')
+    fields = ['city', 'country', 'start_date', 'end_date']
+
+
+class TripDeleteView(DeleteView):
+    model = Trip
+    success_url = reverse_lazy('trip-list')
